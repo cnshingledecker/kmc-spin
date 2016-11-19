@@ -1,26 +1,38 @@
-README for KMC+SPIN model
+#+TITLE: README for KMC+SPIN model
+#+AUTHOR: Christopher N. Shingledecker
+#+OPTIONS: toc:2
 
--- This is a Kinetic Monte Carlo model which calculates the time-dependent spin relaxation of hopping electrons
+#+BEGIN_CENTER
+This is a Kinetic Monte Carlo model which calculates the \\
+time-dependent spin relaxation of hopping electrons
+#+END_CENTER
 
 *COMPONENTS
 
 **MAIN
+
 ***This is the main file. Here the lattice is initiated and the main loop runs until TIME >= MAXTIME (see PARAMETERS.f90)
 
 **PARAMETERS
+
 ***This module contains global variables for the model, including (at the top) simulation specific values, i.e. temperature and lattice size. At the bottom are switches for enabling/disabling different features.
 
 **TYPEDEFS
+
 ***This is where the derived data types (structs) used in the model are listed, as well as certain subroutines for their initialization, etc.
 
 **BSIMPLE
+
 ***This module contains information on binary tree operations, e.g. adding a node, finding a node, etc.
 
 **SUBROUTINES
+
 ***This module contains various subroutines and functions used in the model
 
 **SPINCALC
+
 ***This subroutine is called by main when spins are calculated and it, in turn, calls other subroutines to complete the spin calculation
 
 **MC_TOOLBOX
+
 ***This module contains RNGs

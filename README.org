@@ -2,7 +2,7 @@
 #+AUTHOR: Christopher N. Shingledecker
 #+OPTIONS: toc:2
 
-#+BEGIN_CENTER
+#+BEGIN_CENTER:
 This is a Kinetic Monte Carlo model which calculates the \\
 time-dependent spin relaxation of hopping electrons
 #+END_CENTER
@@ -23,5 +23,6 @@ time-dependent spin relaxation of hopping electrons
 ** MC_TOOLBOX
 *** This module contains RNGs
 
-* TODO Dimensional analysis on Hamiltonian
-* TODO Investigate Chfi dependence on Kubo-Toyabe results
+* THINGS STILL TO DO
+** TODO Dimensional analysis on Hamiltonian
+** TODO Investigate Chfi dependence on Kubo-Toyabe results

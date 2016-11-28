@@ -13,9 +13,10 @@ MODULE parameters
   DOUBLE PRECISION, PARAMETER :: CJ       = 0.0    ! Exchange coupling constant
   DOUBLE PRECISION, PARAMETER :: CSOC     = 0.0    ! SOC coupling constant
   DOUBLE PRECISION, PARAMETER :: KHOP     = 30     ! 1.0d0/(DBLE(NSTEPS)*DT)
-  DOUBLE PRECISION, PARAMETER :: FIXEDTAU = 6.0d0/KHOP ! (MAXTIME/REAL(NSTEPS))
-  DOUBLE PRECISION, PARAMETER :: DT       = FIXEDTAU/1000.0 ! Time step (Delta t)
+  DOUBLE PRECISION, PARAMETER :: FIXEDTAU = (1.0d0/KHOP) ! (MAXTIME/REAL(NSTEPS))
+  DOUBLE PRECISION, PARAMETER :: DT       = FIXEDTAU/100.0 ! Time step (Delta t)
   DOUBLE PRECISION            :: NEXTHOP  = 0.0d0  ! The time of the next hop
+  DOUBLE PRECISION            :: TAUFAC   = 1 
   INTEGER         , PARAMETER :: NSTEPS   = MAXTIME/FIXEDTAU !INT(1.0d0/(KHOP*DT))/6 ! Number of time steps between hops
 
   !******************************************************************************
@@ -231,4 +232,5 @@ MODULE parameters
   ! better comparison with analytic results
   !******************************************************************************
   LOGICAL         , PARAMETER :: FIXEDSTEP     = .TRUE.
+   
 END MODULE parameters

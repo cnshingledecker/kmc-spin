@@ -440,7 +440,7 @@ CONTAINS
     DO WHILE ( empty_site .EQV. .FALSE. )
        CALL RANDOM_NUMBER(rnd1)
        CALL RANDOM_NUMBER(rnd2)
-       IF ( INITIAL_ELECS .EQV. .TRUE. ) THEN 
+       IF ( INITIAL_ELECS .EQV. .TRUE. ) THEN
           i_x = 1 + FLOOR(DBLE(L+1-1)*rnd1)
           CALL RANDOM_NUMBER(rnd1)
        ELSE
@@ -1225,77 +1225,82 @@ CONTAINS
     DOUBLE PRECISION :: delta_e_ij
     DOUBLE PRECISION :: rate
 
-    ! Initialize rates to 0
-    rates = 0.0
-    temp_rate = 0.0
+    taucalc: IF ( FIXEDSTEP .EQV. .TRUE. ) THEN
+!       tau = -1*(LOG(rand)/(KHOP*TAUFAC))
+       tau = FIXEDTAU
+       MATRIX(i_x,i_y,i_z)%tau = tau + TIME
+       MATRIX(i_x,i_y,i_z)%omega = KHOP*TAUFAC
+       CALL RANDOM_NUMBER(rand)
+       n = 1 + FLOOR((6+1-1)*rand)
+       MATRIX(i_x,i_y,i_z)%hop_dir = n
+    ELSE
+       ! Initialize rates to 0
+       rates = 0.0
+       temp_rate = 0.0
 
-    ! Calculate rate to nearest neighbors
-    ! The cases should correspond to the cases
-    ! in the hopping subroutine
-    CALL sum_energies(i_x,i_y,i_z)
-    DO n=1,6
-       rates(n,2) = n
-       CALL hopping ( i_x, i_y, i_z, j_x, j_y, j_z, n )
-       !      PRINT *, "j_coords=",j_x,j_y,j_z
-       IF ( (j_x .NE. 0) .AND. (j_y .NE. 0) .AND. (j_z .NE. 0)) THEN
-          CALL sum_energies(j_x,j_y,j_z)
-          delta_e_ij = MATRIX(j_x,j_y,j_z)%etotal - MATRIX(i_x,i_y,i_z)%etotal
-          IF ( MATRIX(j_x,j_y,j_z)%secondary_species.EQ.0 ) THEN
-             rates(n,1) = miller_abrahams(delta_e_ij)
+       ! Calculate rate to nearest neighbors
+       ! The cases should correspond to the cases
+       ! in the hopping subroutine
+       CALL sum_energies(i_x,i_y,i_z)
+       DO n=1,6
+          rates(n,2) = n
+          CALL hopping ( i_x, i_y, i_z, j_x, j_y, j_z, n )
+          !      PRINT *, "j_coords=",j_x,j_y,j_z
+          IF ( (j_x .NE. 0) .AND. (j_y .NE. 0) .AND. (j_z .NE. 0)) THEN
+             CALL sum_energies(j_x,j_y,j_z)
+             delta_e_ij = MATRIX(j_x,j_y,j_z)%etotal - MATRIX(i_x,i_y,i_z)%etotal
+             IF ( MATRIX(j_x,j_y,j_z)%secondary_species.EQ.0 ) THEN
+                rates(n,1) = miller_abrahams(delta_e_ij)
+             ELSE
+                rates(n,1) = 0.0
+             END IF
           ELSE
              rates(n,1) = 0.0
           END IF
+          rates(n,3) = rates(n,1)
+       END DO
+
+       IF ( i_x .NE. 1 ) THEN
+          CALL DataSort(rates)
+          CALL normalize_probability_and_select_index(rates,temp_ind)
+          ! PRINT *, "Just after normalize_probability_and_select_index, temp_ind=",temp_ind
+
+          ! Call a new random number to get waiting time, τ, for hop
+          rate = 0
+          DO n=1,6
+             IF ( INT(rates(n,2)) .EQ. temp_ind ) rate = rates(n,3)
+          END DO
        ELSE
-          rates(n,1) = 0.0
+          rate = rates(5,3)
+          temp_ind = 5
        END IF
-       rates(n,3) = rates(n,1)
-    END DO
 
-    IF ( i_x .NE. 1 ) THEN
-       CALL DataSort(rates)
-       CALL normalize_probability_and_select_index(rates,temp_ind)
-       ! PRINT *, "Just after normalize_probability_and_select_index, temp_ind=",temp_ind
-
-       ! Call a new random number to get waiting time, τ, for hop
-       rate = 0
-       DO n=1,6
-          IF ( INT(rates(n,2)) .EQ. temp_ind ) rate = rates(n,3)
-       END DO
-    ELSE
-       rate = rates(5,3)
-       temp_ind = 5
-    END IF
-
-    ! PRINT *, "The rate is:",rate
-    CALL RANDOM_NUMBER(rand)
-    IF ( rate .EQ. 0.0 ) THEN
-       DO n=1,6
-          PRINT *, rates(n,:)
-          IF ( rates(n,3) .GT. rate ) THEN
-             rate = rates(n,3)
-             temp_ind = n
-          END IF
-       END DO
+       ! PRINT *, "The rate is:",rate
+       CALL RANDOM_NUMBER(rand)
        IF ( rate .EQ. 0.0 ) THEN
-          MATRIX(i_x,i_y,i_z)%hop_dir = 0
-          MATRIX(i_x,i_y,i_z)%tau =  TIME + TAU
-          MATRIX(i_x,i_y,i_z)%omega = 0
-          RETURN
+          DO n=1,6
+             PRINT *, rates(n,:)
+             IF ( rates(n,3) .GT. rate ) THEN
+                rate = rates(n,3)
+                temp_ind = n
+             END IF
+          END DO
+          IF ( rate .EQ. 0.0 ) THEN
+             MATRIX(i_x,i_y,i_z)%hop_dir = 0
+             MATRIX(i_x,i_y,i_z)%tau =  TIME + TAU
+             MATRIX(i_x,i_y,i_z)%omega = 0
+             RETURN
+          END IF
        END IF
-    END IF
 
-    taucalc: IF ( FIXEDSTEP .EQV. .TRUE. ) THEN
-       tau = FIXEDTAU
-    ELSE
        tau = -1*(LOG(rand)/rate)
+       ! Update matrix with new rate, hopping direction, and waiting time (τ)
+       MATRIX(i_x,i_y,i_z)%tau = tau + TIME
+       MATRIX(i_x,i_y,i_z)%omega = rate
+       MATRIX(i_x,i_y,i_z)%hop_dir = temp_ind
     END IF taucalc
 
     IF ( DEBUG .EQV. .TRUE. ) PRINT *, "τ=",tau
-
-    ! Update matrix with new rate, hopping direction, and waiting time (τ)
-    MATRIX(i_x,i_y,i_z)%tau = tau + TIME
-    MATRIX(i_x,i_y,i_z)%omega = rate
-    MATRIX(i_x,i_y,i_z)%hop_dir = temp_ind
   END SUBROUTINE update_rate_and_time
 
   SUBROUTINE write_matrix_dataframe(i_x,i_y,i_z)

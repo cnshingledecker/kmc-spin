@@ -35,8 +35,12 @@ PROGRAM main
   ! Replace old output files
   OPEN(UNIT=1, FILE="pxt.wsv", STATUS="REPLACE")
   OPEN(UNIT=2, FILE="pxt_deriv.wsv", STATUS="REPLACE")
+  OPEN(UNIT=3, FILE="new_kthop.wsv", STATUS="REPLACE")
+  OPEN(UNIT=4, FILE="new_kt.wsv", STATUS="REPLACE")
   CLOSE(1)
   CLOSE(2)
+  CLOSE(3)
+  CLOSE(4)
 
   time_check = 0
   time_diff  = 0
@@ -163,8 +167,13 @@ PROGRAM main
         !***************************************************************************
         ! Update lattice energies with new charge positions
         !***************************************************************************
-        CALL update_lattice(root, temp, prevNode, nextNode, hop_count)
-        CALL layer_current_density(J_ix)
+        IF ( FIXEDSTEP .EQV. .TRUE. ) THEN
+           CALL update_rate_and_time(j_x,j_y,j_z)
+        ELSE
+           CALL update_lattice(root, temp, prevNode, nextNode, hop_count)
+           CALL layer_current_density(J_ix)
+        END IF
+
 
         !***************************************************************************
         ! If hop_dir = 0, Go here, i.e. do not hop or update energies
@@ -191,10 +200,10 @@ PROGRAM main
      cpu_total = cpu_total + (t2-t1)
      time_diff = TIME
      t1 = t2
-!     IF ( VERBOSE .EQV. .TRUE. ) PRINT *, &
-!          "Time=",TIME,&
-!          "CPU total=",cpu_total,&
-!          "time diff=",time_diff
+     !     IF ( VERBOSE .EQV. .TRUE. ) PRINT *, &
+     !          "Time=",TIME,&
+     !          "CPU total=",cpu_total,&
+     !          "time diff=",time_diff
   END DO mainloop
 
 

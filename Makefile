@@ -1,8 +1,8 @@
 # Compiler
 
 #FC = epcf90
-FC = gfortran
-#FC = ifort
+#FC = gfortran
+FC = ifort
 
 # Flags
 FCFLAGS = -g -pg -llapack -lblas

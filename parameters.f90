@@ -4,19 +4,19 @@ MODULE parameters
   !******************************************************************************
   ! Main Parameters
   !******************************************************************************
-  INTEGER         , PARAMETER :: L        = 10     ! Lattice size
-  INTEGER         , PARAMETER :: EMAX     = 15     ! Max number of electrons allowed in model at any time
+  INTEGER         , PARAMETER :: L        = 100     ! Lattice size
+  INTEGER         , PARAMETER :: EMAX     = 1000     ! Max number of electrons allowed in model at any time
   DOUBLE PRECISION, PARAMETER :: MAXTIME  = 10.0d0 ! The maximum model runtime
   DOUBLE PRECISION, PARAMETER :: T_KELVIN = 300.0  ! The temperature of the lattice (K)
   DOUBLE PRECISION, PARAMETER :: VOLTAGE  = 0.0    ! Applied Voltage
   DOUBLE PRECISION, PARAMETER :: CHFI     = 1.0    ! HFI coupling constant
   DOUBLE PRECISION, PARAMETER :: CJ       = 0.0    ! Exchange coupling constant
   DOUBLE PRECISION, PARAMETER :: CSOC     = 0.0    ! SOC coupling constant
-  DOUBLE PRECISION, PARAMETER :: DT       = 0.0001 ! Time step (Delta t)
-  DOUBLE PRECISION, PARAMETER :: KHOP     = 1      ! 1.0d0/(DBLE(NSTEPS)*DT)
-  INTEGER         , PARAMETER :: NSTEPS   = INT(1.d0/(KHOP*DT)) ! Number of time steps between hops
-  DOUBLE PRECISION            :: FIXEDTAU = MAXTIME      !MAXTIME/REAL(NSTEPS)
+  DOUBLE PRECISION, PARAMETER :: KHOP     = 30     ! 1.0d0/(DBLE(NSTEPS)*DT)
+  DOUBLE PRECISION, PARAMETER :: FIXEDTAU = 6.0d0/KHOP ! (MAXTIME/REAL(NSTEPS))
+  DOUBLE PRECISION, PARAMETER :: DT       = FIXEDTAU/1000.0 ! Time step (Delta t)
   DOUBLE PRECISION            :: NEXTHOP  = 0.0d0  ! The time of the next hop
+  INTEGER         , PARAMETER :: NSTEPS   = MAXTIME/FIXEDTAU !INT(1.0d0/(KHOP*DT))/6 ! Number of time steps between hops
 
   !******************************************************************************
   ! Physical Conditions
@@ -27,7 +27,7 @@ MODULE parameters
   DOUBLE PRECISION, PARAMETER :: ALPHA      = 10./A_NN ! See Cottaar thesis
   INTEGER         , PARAMETER :: N_IMAGES   = 100      ! See Cottaar thesis
   INTEGER         , PARAMETER :: N_DISKS    = 100000   ! See Cottaar thesis
-  DOUBLE PRECISION, PARAMETER :: R_c        = 10.*A_NN ! Critical radius for explicit Coulomb calculations
+  DOUBLE PRECISION, PARAMETER :: R_c        = 0.0d0 !10.*A_NN ! Critical radius for explicit Coulomb calculations
 
   !******************************************************************************
   ! Equivalent of Common Block: TIME
@@ -192,7 +192,7 @@ MODULE parameters
   !******************************************************************************
   ! Select NO_HOP to populate every lattice site with an electron
   !******************************************************************************
-  LOGICAL         , PARAMETER :: NO_HOP        = .TRUE.
+  LOGICAL         , PARAMETER :: NO_HOP        = .FALSE.
 
   !******************************************************************************
   ! Select DEBUG to enable extra print statements for correctness checking
@@ -202,7 +202,7 @@ MODULE parameters
   !******************************************************************************
   ! Select VERBOSE for extra print statements (fewer print statements than debug)
   !******************************************************************************
-  LOGICAL         , PARAMETER :: VERBOSE       = .TRUE.
+  LOGICAL         , PARAMETER :: VERBOSE       = .FALSE.
 
   !******************************************************************************
   ! Select SOC_ON to turn spin-orbit-coupling on

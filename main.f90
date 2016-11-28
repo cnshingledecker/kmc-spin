@@ -171,9 +171,8 @@ PROGRAM main
            CALL update_rate_and_time(j_x,j_y,j_z)
         ELSE
            CALL update_lattice(root, temp, prevNode, nextNode, hop_count)
-           CALL layer_current_density(J_ix)
         END IF
-
+        CALL layer_current_density(J_ix)
 
         !***************************************************************************
         ! If hop_dir = 0, Go here, i.e. do not hop or update energies
